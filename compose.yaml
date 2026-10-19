@@ -8,12 +8,22 @@
 # database or a cache. For examples, see the Awesome Compose repository:
 # https://github.com/docker/awesome-compose
 services:
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    ports:
+     - "8080:80"
+    depends_on:
+     - web
+    
+
+
   web:
     build:
       context: .
       target: final
-    ports:
-      - "8080:8080"
     environment:
       - ConnectionStrings__Default=Host=${PG_Host};Port=${PG_Port};Database=${PG_DB};Username=${PG_User};Password=${PG_Password}
     depends_on:
