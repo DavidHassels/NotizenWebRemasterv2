@@ -23,8 +23,12 @@ jobs:
       uses: actions/setup-dotnet@v6
       with:
         dotnet-version: '10.0.x'
-    - run: dotnet restore
-    - run: dotnet build --no-restore --configuration Release
+    - name: Restore
+      run: dotnet restore NotizenWebRemaster.slnx
+    - name: Build
+      run: dotnet build NotizenWebRemaster.slnx --no-restore --configuration Release
+    - name: Test
+      run: dotnet test NotizenWebRemaster.slnx --no-build --configuration Release
 
       
     
