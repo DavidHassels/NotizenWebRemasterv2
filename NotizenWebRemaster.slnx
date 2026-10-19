@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="NotizenWebRemaster.Tests/NotizenWebRemaster.Tests.csproj" />
+  <Project Path="NotizenWebRemaster/NotizenWebRemaster.csproj" />
+</Solution>

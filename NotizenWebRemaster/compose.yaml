@@ -16,11 +16,11 @@ services:
     ports:
      - "8080:80"
     depends_on:
-     - web
+     - server
     
 
 
-  web:
+  server:
     build:
       context: .
       target: final

@@ -28,9 +28,17 @@ namespace NotizenWebRemaster
         
         public DbSet<Artikel> Artikels { get; set; }
         public NotizenContext() { }
+        
+        public NotizenContext(DbContextOptions<NotizenContext> options) : base(options)
+        {
+
+
+        }
 
         protected override void OnConfiguring(DbContextOptionsBuilder options)
         {
+            if (options.IsConfigured) return;
+
             var constring = Environment.GetEnvironmentVariable("ConnectionStrings__Default");
             
             options.UseNpgsql(constring);
