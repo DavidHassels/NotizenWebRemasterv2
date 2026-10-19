@@ -1,0 +1,8 @@
+
+.env
+obj\
+bin\
+/obj
+bin/
+obj/
+compose.override.yml
