@@ -14,10 +14,30 @@ services:
       context: .
       dockerfile: Dockerfile.frontend
     ports:
-     - "8080:80"
+     - "7029:80"
     depends_on:
      - server
     
+  keycloak:
+    image: quay.io/keycloak/keycloak:latest
+    container_name: keycloak
+    command: start-dev
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://${PG_Host}:${PG_Port}/${PG_DB}
+      KC_DB_USERNAME: ${PG_User}
+      KC_DB_PASSWORD: ${PG_Password}
+
+      KC_BOOTSTRAP_ADMIN_USERNAME: ${KC_Admin}
+      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KC_Password}
+      KC_HTTP_ENABLED: "true"
+
+    ports:
+     - "8080:8080"
+
 
 
   server:
