@@ -1,7 +1,16 @@
-﻿async function LoadList() {
+﻿async function api(pfad, optionen) {
+    const r = await fetch(pfad, optionen);
+    if (r.status === 401) {
+        window.location.href = "/api/login";
+        throw new Error("nicht angemeldet");
+    }
+    return r;
+}
+
+async function LoadList() {
 
     //get list from server
-    const response = await fetch("/api/artikel");
+    const response = await api("/api/artikel");
     const data = await response.json();
     
     const meldung = document.getElementById("meldung");
@@ -22,7 +31,7 @@
 
 async function LoadStats() {
     //get stats from api
-    const response = await fetch("/api/statistik");
+    const response = await api("/api/statistik");
     const data = await response.json();
 
     //make html elements to js objects
@@ -58,7 +67,7 @@ async function add() {
         return;
     }
 
-    const post = await fetch("/api/artikel", {
+    const post = await api("/api/artikel", {
         method: "POST", 
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({name: name.value, price: preis.value})
@@ -70,7 +79,7 @@ async function add() {
 
 //send put to server to set bool done of an item
 async function SetDone(id,erl) {
-    const put = await fetch(`/api/artikel/${id}`, {
+    const put = await api(`/api/artikel/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({erl})
@@ -103,7 +112,7 @@ async function HandleDoneList() {
 
 //send remove call to server to remove item with specified id
 async function Remove(id) {
-    return await fetch(`/api/artikel/${id}`, {
+    return await api(`/api/artikel/${id}`, {
         method: "DELETE"
     });
 }
@@ -163,6 +172,8 @@ async function GenTable(data)
         tr.appendChild(td4);
 
     }
+
+    
     
 
 }
