@@ -5,8 +5,14 @@ using Microsoft.AspNetCore.Mvc;
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<NotizenContext>();
 builder.Services.AddScoped<ArtikelHandler>();
+builder.Services.AddKeycloakAuth(builder.Configuration);
 
 var app = builder.Build();
+
+app.UseDefaultFiles();
+app.UseStaticFiles();
+app.UseAuthentication();
+app.UseAuthorization();
 
 using (var scope = app.Services.CreateScope())
 {
@@ -14,17 +20,17 @@ using (var scope = app.Services.CreateScope())
     await c.init(); 
 }
 
-app.UseDefaultFiles();
-app.UseStaticFiles();
 
-app.MapGet("/api/artikel", async (ArtikelHandler handler) => handler.getList());
 
-app.MapPost("api/artikel", (NeuerArtikel art, ArtikelHandler handler) => handler.add(art));
+app.MapAuthEndpoints();
+app.MapGet("/api/artikel", async (ArtikelHandler handler) => handler.getList()).RequireAuthorization();
 
-app.MapPut("/api/artikel/{id}", (int id,Erledigt erl, ArtikelHandler handler) => handler.SetzeErledigt(id, erl.erl));
+app.MapPost("api/artikel", (NeuerArtikel art, ArtikelHandler handler) => handler.add(art)).RequireAuthorization();
 
-app.MapDelete("/api/artikel/{id}", (int id, ArtikelHandler handler) => handler.remove(id));
+app.MapPut("/api/artikel/{id}", (int id,Erledigt erl, ArtikelHandler handler) => handler.SetzeErledigt(id, erl.erl)).RequireAuthorization();
 
-app.MapGet("/api/statistik", (ArtikelHandler handler) => handler.getStatistic());
+app.MapDelete("/api/artikel/{id}", (int id, ArtikelHandler handler) => handler.remove(id)).RequireAuthorization();
+
+app.MapGet("/api/statistik", (ArtikelHandler handler) => handler.getStatistic()).RequireAuthorization();
 app.Run();
 
