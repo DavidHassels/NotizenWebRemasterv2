@@ -16,6 +16,7 @@ namespace NotizenWebRemaster
 
     public class PostgresFixture : IAsyncLifetime
     {
+        
         private readonly PostgreSqlContainer _container = new PostgreSqlBuilder("postgres:16").Build();
 
         public string ConnectionString => _container.GetConnectionString();
@@ -41,6 +42,8 @@ namespace NotizenWebRemaster
 
     public class ArtikelHandlerPostgresTests : IClassFixture<PostgresFixture>
     {
+        private const string UserA = "user-a";
+        private const string UserB = "user-b";
         private readonly PostgresFixture _fx;
         public ArtikelHandlerPostgresTests(PostgresFixture fx) => _fx = fx;
 
@@ -50,7 +53,7 @@ namespace NotizenWebRemaster
             await using var db = _fx.NeuerContext();
             var handler = new ArtikelHandler(db);
 
-            handler.add(new NeuerArtikel("Hammer", 9.99m));
+            handler.add(new NeuerArtikel("Hammer", 9.99m), UserA);
 
             await using var pruefen = _fx.NeuerContext();
             var a = await pruefen.Artikels.FirstOrDefaultAsync(x => x.name == "Hammer");
@@ -58,10 +61,10 @@ namespace NotizenWebRemaster
             Assert.Equal(9.99m, a!.price);
         }
 
-        private async Task<int> HF_addArt(string name, decimal preis = 1m, bool erledigt = false)
+        private async Task<int> HF_addArt(string name, decimal preis = 1m, bool erledigt = false, string uid = UserA)
         {
             await using var db = _fx.NeuerContext();
-            var a = new Artikel { name = name, price = preis, done = erledigt };
+            var a = new Artikel { name = name, price = preis, done = erledigt, UserID = uid };
             db.Artikels.Add(a);
             await db.SaveChangesAsync();
             return a.id;
@@ -74,7 +77,7 @@ namespace NotizenWebRemaster
             await using var db = _fx.NeuerContext();
             var handler = new ArtikelHandler(db);
 
-            handler.remove(id);
+            handler.remove(id, UserA);
 
             await using var pruefen = _fx.NeuerContext();
             Assert.Null(await pruefen.Artikels.FindAsync(id));
@@ -86,7 +89,7 @@ namespace NotizenWebRemaster
             await using var db = _fx.NeuerContext();
             var handler = new ArtikelHandler(db);
 
-            var result = handler.remove(-1);
+            var result = handler.remove(-1, UserA);
 
             Assert.IsType<BadRequest>(result);   // nur, wenn deine Methode NotFound zurückgibt
         }
@@ -101,7 +104,7 @@ namespace NotizenWebRemaster
             await using var db = _fx.NeuerContext();
             var handler = new ArtikelHandler(db);
 
-            var result = handler.SetzeErledigt(id, neuerWert);
+            var result = handler.SetzeErledigt(id, neuerWert, UserA);
 
             Assert.IsAssignableFrom<IStatusCodeHttpResult>(result);
             Assert.Equal(200, ((IStatusCodeHttpResult)result).StatusCode);
@@ -117,7 +120,7 @@ namespace NotizenWebRemaster
             await using var db = _fx.NeuerContext();
             var handler = new ArtikelHandler(db);
 
-            var result = handler.SetzeErledigt(999999, true);
+            var result = handler.SetzeErledigt(999999, true, UserA);
 
             Assert.IsAssignableFrom<IStatusCodeHttpResult>(result);
             Assert.Equal(400, ((IStatusCodeHttpResult)result).StatusCode);
@@ -131,7 +134,7 @@ namespace NotizenWebRemaster
             await using var db = _fx.NeuerContext();
             var handler = new ArtikelHandler(db);
 
-            var result = handler.getList();
+            var result = handler.getList(UserA);
 
             var ok = Assert.IsAssignableFrom<IValueHttpResult>(result);
             Assert.Equal(200, ((IStatusCodeHttpResult)result).StatusCode);
@@ -149,7 +152,7 @@ namespace NotizenWebRemaster
                 await using var db = fremd.NeuerContext();
                 var handler = new ArtikelHandler(db);
 
-                var result = handler.getStatistic();
+                var result = handler.getStatistic(UserA);
 
                 Assert.Equal(400, ((IStatusCodeHttpResult)result).StatusCode);
                 var stat = Assert.IsType<Statistik>(((IValueHttpResult)result).Value);
@@ -173,16 +176,16 @@ namespace NotizenWebRemaster
                 await using (var seed = fremd.NeuerContext())
                 {
                     seed.Artikels.AddRange(
-                        new Artikel { name = "Offen1", price = 10m, done = false },
-                        new Artikel { name = "Offen2", price = 5.5m, done = false },
-                        new Artikel { name = "Fertig", price = 100m, done = true });
+                        new Artikel { name = "Offen1", price = 10m, done = false, UserID = UserA },
+                        new Artikel { name = "Offen2", price = 5.5m, done = false, UserID = UserA },
+                        new Artikel { name = "Fertig", price = 100m, done = true ,UserID = UserA});
                     await seed.SaveChangesAsync();
                 }
 
                 await using var db = fremd.NeuerContext();
                 var handler = new ArtikelHandler(db);
 
-                var result = handler.getStatistic();
+                var result = handler.getStatistic(UserA);
 
                 Assert.Equal(200, ((IStatusCodeHttpResult)result).StatusCode);
                 var stat = Assert.IsType<Statistik>(((IValueHttpResult)result).Value);
@@ -206,12 +209,12 @@ namespace NotizenWebRemaster
             {
                 await using (var seed = fremd.NeuerContext())
                 {
-                    seed.Artikels.Add(new Artikel { name = "Fertig", price = 9m, done = true });
+                    seed.Artikels.Add(new Artikel { name = "Fertig", price = 9m, done = true , UserID = UserA });
                     await seed.SaveChangesAsync();
                 }
 
                 await using var db = fremd.NeuerContext();
-                var result = new ArtikelHandler(db).getStatistic();
+                var result = new ArtikelHandler(db).getStatistic(UserA);
 
                 Assert.Equal(200, ((IStatusCodeHttpResult)result).StatusCode);
                 var stat = Assert.IsType<Statistik>(((IValueHttpResult)result).Value);
