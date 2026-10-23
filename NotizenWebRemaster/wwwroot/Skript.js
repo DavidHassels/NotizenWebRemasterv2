@@ -56,6 +56,17 @@ async function LoadStats() {
     }
 }
 
+async function loadUser() {
+    const r = await api("/api/me");
+    if (!r.ok) return;
+    const me = await r.json();
+    document.getElementById("benutzerName").textContent = "logged in as: ${me.name}" ?? "";
+}
+
+async function Logout() {
+    window.location.href = "/api/logout"
+}
+
 //schickt name und preis eines neuen Artikels an den Server
 async function add() {
     const name = document.getElementById("name");
@@ -136,6 +147,7 @@ async function HandleRemoveList() {
 async function LoadPage() {
     await LoadList();
     await LoadStats();
+    await loadUser();
 }
 
 //html shenanigans

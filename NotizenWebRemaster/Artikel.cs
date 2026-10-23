@@ -12,26 +12,26 @@ namespace NotizenWebRemaster
             await context.Database.EnsureCreatedAsync();
         }
         //fügt übergebenen Artikel zur table Artikel
-        internal IResult add(NeuerArtikel art)
+        internal IResult add(NeuerArtikel art, string uid)
         {
             if (art == null || art.name == null || art.price == 0) return Results.BadRequest();
-            context.Artikels.Add(new Artikel {name = art.name, price = art.price});
+            context.Artikels.Add(new Artikel {name = art.name, price = art.price, UserID = uid});
             context.SaveChanges();
             return Results.Ok();
         }
 
         //returned die Liste der Artikel
-        internal IResult getList()
+        internal IResult getList(string uid)
         {
-            return Results.Ok(context.Artikels.ToList());
+            return Results.Ok(context.Artikels.Where(x => x.UserID == uid).ToList());
         }
 
         //berechnet und returned Statistik
-        internal IResult getStatistic()
+        internal IResult getStatistic(string uid)
         {
             if (!context.Artikels.Any()) return Results.BadRequest(new Statistik(0,null,0));
 
-            List<Artikel> arti = context.Artikels.Where(x => x.done == false).ToList();
+            List<Artikel> arti = context.Artikels.Where(x => x.done == false && x.UserID == uid).ToList();
             
             int c = 0;
             decimal sum = 0;
@@ -47,11 +47,11 @@ namespace NotizenWebRemaster
         }
 
         //entfernt den Artikel mit übergebener id
-        internal IResult remove(int id)
+        internal IResult remove(int id, string uid)
         {
             if(id<0) return Results.BadRequest();
 
-            var art = context.Artikels.Find(id);
+            var art = context.Artikels.FirstOrDefault(x => x.UserID == uid && x.id == id);
             if(art == null) return Results.NotFound();
              
             context.Artikels.Remove(art);
@@ -62,9 +62,9 @@ namespace NotizenWebRemaster
 
 
         //Setzt das done Attribut auf den übergebenen bool
-        internal IResult SetzeErledigt(int id, bool erl)
+        internal IResult SetzeErledigt(int id, bool erl, string uid)
         {
-            var art = context.Artikels.Find(id);
+            var art = context.Artikels.FirstOrDefault(x => x.UserID == uid && x.id == id);
             if( art == null) return Results.BadRequest();
 
             art.done = erl;
