@@ -1,4 +1,4 @@
-﻿//using System.Data.Entity;
+
 using Microsoft.EntityFrameworkCore;
 using Npgsql.EntityFrameworkCore.PostgreSQL;
 using System.Configuration;
@@ -21,7 +21,7 @@ namespace NotizenWebRemaster
         public string ?name { get; set; }
         public decimal price { get; set; }
         public bool done { get; set; }
-        public string UserID { get; set; }
+        public string UserID { get; set; } = "";
 
     }
 
