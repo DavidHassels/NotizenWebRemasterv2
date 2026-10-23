@@ -51,6 +51,8 @@ services:
       Keycloak__Metadata: "http://keycloak:8080/realms/NotizenTool/.well-known/openid-configuration"
       Keycloak__ClientId: "noteclient"
       Keycloak__ClientSecret: ${KC_CLIENT_SECRET}
+    volumes:
+      - keys:/home/app/.aspnet/DataProtection-Keys
 
     depends_on:
       db:
@@ -71,6 +73,7 @@ services:
 
 volumes:
   pgdaten:
+  keys:
 
 
 # The commented out section below is an example of how to define a PostgreSQL

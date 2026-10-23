@@ -11,6 +11,7 @@ namespace NotizenWebRemaster
     {
         public int uid { get; set; }
         public string ?username { get; set; }
+        //public List<Artikel> UserArtikel { get; set; }  
 
     }
 
@@ -19,7 +20,8 @@ namespace NotizenWebRemaster
         public int id { get; set; } 
         public string ?name { get; set; }
         public decimal price { get; set; }
-        public bool done { get; set; } 
+        public bool done { get; set; }
+        public string UserID { get; set; }
 
     }
 
