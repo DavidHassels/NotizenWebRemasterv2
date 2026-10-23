@@ -21,7 +21,7 @@ namespace NotizenWebRemaster
         public string ?name { get; set; }
         public decimal price { get; set; }
         public bool done { get; set; }
-        public string UserID { get; set; }
+        public string UserID { get; set; } = "";
 
     }
 

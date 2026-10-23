@@ -60,7 +60,7 @@ async function loadUser() {
     const r = await api("/api/me");
     if (!r.ok) return;
     const me = await r.json();
-    document.getElementById("benutzerName").textContent = "logged in as: ${me.name}" ?? "";
+    document.getElementById("benutzerName").textContent = `logged in as: ${me.name}` ?? "";
 }
 
 async function Logout() {
